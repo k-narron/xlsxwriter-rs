@@ -683,11 +683,17 @@ impl<'a> Worksheet<'a> {
         last_row: WorksheetRow,
         last_col: WorksheetCol,
         conditional_format: &ConditionalFormat,
+        stop_if_true: Option<bool>,
     ) -> Result<(), XlsxError> {
         let mut c_string_helper = CStringHelper::new();
         unsafe {
             let mut conditional_format =
                 conditional_format.into_internal_type(self._workbook, &mut c_string_helper)?;
+            
+            if let Some(true) = stop_if_true {
+                conditional_format.stop_if_true = convert_bool(true);
+            }
+
             let result = libxlsxwriter_sys::worksheet_conditional_format_range(
                 self.worksheet,
                 first_row,
@@ -731,6 +737,7 @@ mod test {
             101,
             0,
             &ConditionalFormat::top_num(10, &format),
+            None,
         )?;
 
         Ok(())
